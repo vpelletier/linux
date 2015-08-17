@@ -1027,4 +1027,13 @@ config INTEL_TELEMETRY
 	  used to get various SoC events and parameters
 	  directly via debugfs files. Various tools may use
 	  this interface for SoC state monitoring.
+
+config QNAP_TSX51
+	tristate "QNAP TS-x51 NAS"
+	select LEDS_GPIO
+	select KEYBOARD_GPIO_POLLED
+	select GPIO_F7188X
+	---help---
+	  This driver provides support for QNAP TS-x51 NAS enclosure
+	  leds (drive error, status, usb) and buttons.
 endif # X86_PLATFORM_DEVICES
