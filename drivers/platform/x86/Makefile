@@ -2,6 +2,7 @@
 # Makefile for linux/drivers/platform/x86
 # x86 Platform-Specific Drivers
 #
+obj-$(CONFIG_QNAP_TSX51)	+= qnap-tsx51.o
 obj-$(CONFIG_ASUS_LAPTOP)	+= asus-laptop.o
 obj-$(CONFIG_ASUS_WMI)		+= asus-wmi.o
 obj-$(CONFIG_ASUS_NB_WMI)	+= asus-nb-wmi.o

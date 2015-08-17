@@ -15,6 +15,15 @@ menuconfig X86_PLATFORM_DEVICES
 
 if X86_PLATFORM_DEVICES
 
+config QNAP_TSX51
+	tristate "QNAP TS-x51 NAS"
+	select LEDS_GPIO
+	select KEYBOARD_GPIO_POLLED
+	select GPIO_F7188X
+	---help---
+	  This driver provides support for QNAP TS-x51 NAS enclosure
+	  leds (drive error, status, usb) and buttons.
+
 config ACER_WMI
 	tristate "Acer WMI Laptop Extras"
 	depends on ACPI
