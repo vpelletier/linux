@@ -944,4 +944,14 @@ config SURFACE_PRO3_BUTTON
 	depends on ACPI && INPUT
 	---help---
 	  This driver handles the power/home/volume buttons on the Microsoft Surface Pro 3 tablet.
+
+config QNAP_TSX51
+	tristate "QNAP TS-x51 NAS"
+	select LEDS_GPIO
+	select KEYBOARD_GPIO_POLLED
+	select GPIO_F7188X
+	---help---
+	  This driver provides support for QNAP TS-x51 NAS enclosure
+	  leds (drive error, status, usb) and buttons.
+
 endif # X86_PLATFORM_DEVICES
