@@ -122,6 +122,7 @@ static inline void superio_exit(int base)
  * GPIO chip.
  */
 
+static int f7188x_gpio_get_direction(struct gpio_chip *chip, unsigned offset);
 static int f7188x_gpio_direction_in(struct gpio_chip *chip, unsigned offset);
 static int f7188x_gpio_get(struct gpio_chip *chip, unsigned offset);
 static int f7188x_gpio_direction_out(struct gpio_chip *chip,
@@ -133,6 +134,7 @@ static void f7188x_gpio_set(struct gpio_chip *chip, unsigned offset, int value);
 		.chip = {						\
 			.label            = DRVNAME,			\
 			.owner            = THIS_MODULE,		\
+			.get_direction    = f7188x_gpio_get_direction,	\
 			.direction_input  = f7188x_gpio_direction_in,	\
 			.get              = f7188x_gpio_get,		\
 			.direction_output = f7188x_gpio_direction_out,	\
@@ -189,6 +191,26 @@ static struct f7188x_gpio_bank f71889_gpio_bank[] = {
 	F7188X_GPIO_BANK(60, 8, 0x90),
 	F7188X_GPIO_BANK(70, 8, 0x80),
 };
+
+static int f7188x_gpio_get_direction(struct gpio_chip *chip, unsigned offset)
+{
+	int err;
+	struct f7188x_gpio_bank *bank =
+		container_of(chip, struct f7188x_gpio_bank, chip);
+	struct f7188x_sio *sio = bank->data->sio;
+	u8 dir;
+
+	err = superio_enter(sio->addr);
+	if (err)
+		return err;
+	superio_select(sio->addr, SIO_LD_GPIO);
+
+	dir = superio_inb(sio->addr, gpio_dir(bank->regbase));
+
+	superio_exit(sio->addr);
+
+	return !(dir & 1 << offset);
+}
 
 static int f7188x_gpio_direction_in(struct gpio_chip *chip, unsigned offset)
 {
