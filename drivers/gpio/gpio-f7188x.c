@@ -76,12 +76,8 @@ static inline int superio_inb(int base, int reg)
 static int superio_inw(int base, int reg)
 {
 	int val;
-
-	outb(reg++, base);
-	val = inb(base + 1) << 8;
-	outb(reg, base);
-	val |= inb(base + 1);
-
+	val  = superio_inb(base, reg) << 8;
+	val |= superio_inb(base, reg + 1);
 	return val;
 }
 
