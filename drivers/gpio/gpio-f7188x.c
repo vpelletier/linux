@@ -236,15 +236,10 @@ static int f7188x_gpio_get(struct gpio_chip *chip, unsigned offset)
 	struct f7188x_gpio_bank *bank =
 		container_of(chip, struct f7188x_gpio_bank, chip);
 	struct f7188x_sio *sio = bank->data->sio;
-	u8 dir, data;
+	u8 data;
 
 	mutex_lock(&sio->lock);
-	dir = f7188x_read8(sio, gpio_dir(bank->regbase));
-	dir = !!(dir & (1 << offset));
-	if (dir)
-		data = f7188x_read8(sio, gpio_data_out(bank->regbase));
-	else
-		data = f7188x_read8(sio, gpio_data_in(bank->regbase));
+	data = f7188x_read8(sio, gpio_data_in(bank->regbase));
 	mutex_unlock(&sio->lock);
 
 	return !!(data & 1 << offset);
