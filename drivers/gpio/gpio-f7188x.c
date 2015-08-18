@@ -230,19 +230,14 @@ static int f7188x_gpio_get(struct gpio_chip *chip, unsigned offset)
 	int err;
 	struct f7188x_gpio_bank *bank = gpiochip_get_data(chip);
 	struct f7188x_sio *sio = bank->data->sio;
-	u8 dir, data;
+	u8 data;
 
 	err = superio_enter(sio->addr);
 	if (err)
 		return err;
 	superio_select(sio->addr, SIO_LD_GPIO);
 
-	dir = superio_inb(sio->addr, gpio_dir(bank->regbase));
-	dir = !!(dir & (1 << offset));
-	if (dir)
-		data = superio_inb(sio->addr, gpio_data_out(bank->regbase));
-	else
-		data = superio_inb(sio->addr, gpio_data_in(bank->regbase));
+	data = superio_inb(sio->addr, gpio_data_in(bank->regbase));
 
 	superio_exit(sio->addr);
 
