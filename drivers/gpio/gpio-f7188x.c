@@ -161,7 +161,7 @@ static struct f7188x_gpio_bank f71869_gpio_bank[] = {
 };
 
 static struct f7188x_gpio_bank f71869a_gpio_bank[] = {
-	F7188X_GPIO_BANK(0, 6, 0xF0),
+	F7188X_GPIO_BANK(1, 5, 0xF0),
 	F7188X_GPIO_BANK(10, 8, 0xE0),
 	F7188X_GPIO_BANK(20, 8, 0xD0),
 	F7188X_GPIO_BANK(30, 8, 0xC0),
