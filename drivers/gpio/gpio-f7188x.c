@@ -153,6 +153,8 @@ static int f7188x_gpio_get(struct gpio_chip *chip, unsigned offset);
 static int f7188x_gpio_direction_out(struct gpio_chip *chip,
 				     unsigned offset, int value);
 static void f7188x_gpio_set(struct gpio_chip *chip, unsigned offset, int value);
+static void f7188x_gpio_set_multiple(struct gpio_chip *chip, unsigned long *mask,
+				     unsigned long *bits);
 
 #define F7188X_GPIO_BANK(_base, _ngpio, _regbase)			\
 	{								\
@@ -164,6 +166,7 @@ static void f7188x_gpio_set(struct gpio_chip *chip, unsigned offset, int value);
 			.get              = f7188x_gpio_get,		\
 			.direction_output = f7188x_gpio_direction_out,	\
 			.set              = f7188x_gpio_set,		\
+			.set_multiple     = f7188x_gpio_set_multiple,	\
 			.base             = _base,			\
 			.ngpio            = _ngpio,			\
 			.can_sleep        = true,			\
@@ -298,6 +301,21 @@ static void f7188x_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 		data_out |= (1 << offset);
 	else
 		data_out &= ~(1 << offset);
+	f7188x_write8(sio, gpio_data_out(bank->regbase), data_out);
+	mutex_unlock(&sio->lock);
+}
+
+static void f7188x_gpio_set_multiple(struct gpio_chip *chip, unsigned long *mask,
+				     unsigned long *bits)
+{
+	struct f7188x_gpio_bank *bank =
+		container_of(chip, struct f7188x_gpio_bank, chip);
+	struct f7188x_sio *sio = bank->data->sio;
+	u8 data_out;
+
+	mutex_lock(&sio->lock);
+	data_out = f7188x_read8(sio, gpio_data_out(bank->regbase));
+	data_out = (data_out & ~mask[0]) | (bits[0] & mask[0]);
 	f7188x_write8(sio, gpio_data_out(bank->regbase), data_out);
 	mutex_unlock(&sio->lock);
 }
