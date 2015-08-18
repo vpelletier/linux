@@ -147,6 +147,7 @@ static void f7188x_write8(struct f7188x_sio *data, u8 reg, u8 val)
  * GPIO chip.
  */
 
+static int f7188x_gpio_get_direction(struct gpio_chip *chip, unsigned offset);
 static int f7188x_gpio_direction_in(struct gpio_chip *chip, unsigned offset);
 static int f7188x_gpio_get(struct gpio_chip *chip, unsigned offset);
 static int f7188x_gpio_direction_out(struct gpio_chip *chip,
@@ -158,6 +159,7 @@ static void f7188x_gpio_set(struct gpio_chip *chip, unsigned offset, int value);
 		.chip = {						\
 			.label            = DRVNAME,			\
 			.owner            = THIS_MODULE,		\
+			.get_direction    = f7188x_gpio_get_direction,	\
 			.direction_input  = f7188x_gpio_direction_in,	\
 			.get              = f7188x_gpio_get,		\
 			.direction_output = f7188x_gpio_direction_out,	\
@@ -214,6 +216,20 @@ static struct f7188x_gpio_bank f71889_gpio_bank[] = {
 	F7188X_GPIO_BANK(60, 8, 0x90),
 	F7188X_GPIO_BANK(70, 8, 0x80),
 };
+
+static int f7188x_gpio_get_direction(struct gpio_chip *chip, unsigned offset)
+{
+	struct f7188x_gpio_bank *bank =
+		container_of(chip, struct f7188x_gpio_bank, chip);
+	struct f7188x_sio *sio = bank->data->sio;
+	u8 dir;
+
+	mutex_lock(&sio->lock);
+	dir = f7188x_read8(sio, gpio_dir(bank->regbase));
+	mutex_unlock(&sio->lock);
+
+	return !(dir & 1 << offset);
+}
 
 static int f7188x_gpio_direction_in(struct gpio_chip *chip, unsigned offset)
 {
