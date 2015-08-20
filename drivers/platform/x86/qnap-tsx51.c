@@ -3,12 +3,17 @@
  *
  * Copyright (C) 2015 Vincent Pelletier <plr.vincent@gmail.com>
  */
+#define QNAP_TSX51_GPIOD 0
 
 #include <linux/leds.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/input.h>
 #include <linux/gpio_keys.h>
+#if QNAP_TSX51_GPIOD
+#include <linux/gpio/consumer.h>
+#include <linux/gpio.h>
+#endif
 
 static void qnap_tsx51_device_pdev_release(struct device *dev);
 
@@ -141,16 +146,81 @@ static void qnap_tsx51_device_pdev_release(struct device *dev)
 static int __init qnap_tsx51_init(void)
 {
 	int ret;
+#if QNAP_TSX51_GPIOD
+	int led = 0;
+	int button = 0;
+	unsigned long flags;
+#endif
 
 	ret = request_module("gpio_f7188x");
 	if (ret)
 		return ret;
+
+#if QNAP_TSX51_GPIOD
+	for (; led < ARRAY_SIZE(qnap_tsx51_led); led++) {
+		flags = 0;
+
+		if (qnap_tsx51_led[led].active_low)
+			flags |= GPIOF_ACTIVE_LOW;
+
+		ret = devm_gpio_request_one(
+			&qnap_tsx51_leds_dev.dev,
+			qnap_tsx51_led[led].gpio,
+			flags,
+			qnap_tsx51_led[led].name
+		);
+
+		if (ret)
+			goto error;
+
+		qnap_tsx51_led[led].gpiod = gpio_to_desc(
+			qnap_tsx51_led[led].gpio
+		);
+	}
+
+	for (; button < ARRAY_SIZE(qnap_tsx51_gpio_buttons); button++) {
+		flags = GPIOF_IN;
+
+		if (qnap_tsx51_gpio_buttons[button].active_low)
+			flags |= GPIOF_ACTIVE_LOW;
+
+		ret = devm_gpio_request_one(
+			&qnap_tsx51_buttons_dev.dev,
+			qnap_tsx51_gpio_buttons[button].gpio,
+			flags,
+			qnap_tsx51_gpio_buttons[button].desc
+		);
+
+		if (ret)
+			goto error;
+
+		qnap_tsx51_gpio_buttons[button].gpiod = gpio_to_desc(
+			qnap_tsx51_gpio_buttons[button].gpio
+		);
+	}
+#endif
 
 	return platform_add_devices(
 		qnap_tsx51_devs,
 		ARRAY_SIZE(qnap_tsx51_devs)
 	);
 
+#if QNAP_TSX51_GPIOD
+error:
+	for (; button; button--)
+		devm_gpio_free(
+			&qnap_tsx51_buttons_dev.dev,
+			qnap_tsx51_gpio_buttons[button - 1].gpio
+		);
+
+	for (; led; led--)
+		devm_gpio_free(
+			&qnap_tsx51_leds_dev.dev,
+			qnap_tsx51_led[led - 1].gpio
+		);
+
+	return ret;
+#endif
 }
 
 static void __exit qnap_tsx51_exit(void)
@@ -166,3 +236,4 @@ module_exit(qnap_tsx51_exit);
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("QNAP TS-x51 NAS");
 MODULE_AUTHOR("Vincent Pelletier <plr.vincent@gmail.com>");
+#undef QNAP_TSX51_GPIOD
