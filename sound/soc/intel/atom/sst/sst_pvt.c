@@ -26,12 +26,15 @@
 #include <linux/pm_runtime.h>
 #include <linux/sched.h>
 #include <linux/delay.h>
+#include <linux/io-64-nonatomic-lo-hi.h>
 #include <sound/asound.h>
 #include <sound/core.h>
 #include <sound/pcm.h>
 #include <sound/soc.h>
 #include <sound/compress_driver.h>
+
 #include <asm/platform_sst_audio.h>
+
 #include "../sst-mfld-platform.h"
 #include "sst.h"
 #include "../../common/sst-dsp.h"
@@ -47,27 +50,15 @@ u32 sst_shim_read(void __iomem *addr, int offset)
 	return readl(addr + offset);
 }
 
-u64 sst_reg_read64(void __iomem *addr, int offset)
-{
-	u64 val = 0;
-
-	memcpy_fromio(&val, addr + offset, sizeof(val));
-
-	return val;
-}
-
 int sst_shim_write64(void __iomem *addr, int offset, u64 value)
 {
-	memcpy_toio(addr + offset, &value, sizeof(value));
+	lo_hi_writeq(value, addr + offset);
 	return 0;
 }
 
 u64 sst_shim_read64(void __iomem *addr, int offset)
 {
-	u64 val = 0;
-
-	memcpy_fromio(&val, addr + offset, sizeof(val));
-	return val;
+	return lo_hi_readq(addr + offset);
 }
 
 void sst_set_fw_state_locked(
