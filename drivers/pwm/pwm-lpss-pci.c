@@ -20,7 +20,6 @@
 static int pwm_lpss_probe_pci(struct pci_dev *pdev,
 			      const struct pci_device_id *id)
 {
-	const struct pwm_lpss_boardinfo *info;
 	struct pwm_lpss_chip *lpwm;
 	int err;
 
@@ -28,8 +27,7 @@ static int pwm_lpss_probe_pci(struct pci_dev *pdev,
 	if (err < 0)
 		return err;
 
-	info = (struct pwm_lpss_boardinfo *)id->driver_data;
-	lpwm = pwm_lpss_probe(&pdev->dev, &pdev->resource[0], info);
+	lpwm = pwm_lpss_probe(&pdev->dev, &pdev->resource[0], id->driver_data);
 	if (IS_ERR(lpwm))
 		return PTR_ERR(lpwm);
 
@@ -73,14 +71,14 @@ static const struct dev_pm_ops pwm_lpss_pci_pm = {
 };
 
 static const struct pci_device_id pwm_lpss_pci_ids[] = {
-	{ PCI_VDEVICE(INTEL, 0x0ac8), (unsigned long)&pwm_lpss_bxt_info},
-	{ PCI_VDEVICE(INTEL, 0x0f08), (unsigned long)&pwm_lpss_byt_info},
-	{ PCI_VDEVICE(INTEL, 0x0f09), (unsigned long)&pwm_lpss_byt_info},
-	{ PCI_VDEVICE(INTEL, 0x11a5), (unsigned long)&pwm_lpss_bxt_info},
-	{ PCI_VDEVICE(INTEL, 0x1ac8), (unsigned long)&pwm_lpss_bxt_info},
-	{ PCI_VDEVICE(INTEL, 0x2288), (unsigned long)&pwm_lpss_bsw_info},
-	{ PCI_VDEVICE(INTEL, 0x2289), (unsigned long)&pwm_lpss_bsw_info},
-	{ PCI_VDEVICE(INTEL, 0x5ac8), (unsigned long)&pwm_lpss_bxt_info},
+	{ PCI_VDEVICE(INTEL, 0x0ac8), PWM_LPSS_BXT },
+	{ PCI_VDEVICE(INTEL, 0x0f08), PWM_LPSS_BYT },
+	{ PCI_VDEVICE(INTEL, 0x0f09), PWM_LPSS_BYT },
+	{ PCI_VDEVICE(INTEL, 0x11a5), PWM_LPSS_BXT },
+	{ PCI_VDEVICE(INTEL, 0x1ac8), PWM_LPSS_BXT },
+	{ PCI_VDEVICE(INTEL, 0x2288), PWM_LPSS_BSW },
+	{ PCI_VDEVICE(INTEL, 0x2289), PWM_LPSS_BSW },
+	{ PCI_VDEVICE(INTEL, 0x5ac8), PWM_LPSS_BXT },
 	{ },
 };
 MODULE_DEVICE_TABLE(pci, pwm_lpss_pci_ids);

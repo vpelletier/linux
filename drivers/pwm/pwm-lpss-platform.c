@@ -20,7 +20,6 @@
 
 static int pwm_lpss_probe_platform(struct platform_device *pdev)
 {
-	const struct pwm_lpss_boardinfo *info;
 	const struct acpi_device_id *id;
 	struct pwm_lpss_chip *lpwm;
 	struct resource *r;
@@ -29,10 +28,9 @@ static int pwm_lpss_probe_platform(struct platform_device *pdev)
 	if (!id)
 		return -ENODEV;
 
-	info = (const struct pwm_lpss_boardinfo *)id->driver_data;
 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 
-	lpwm = pwm_lpss_probe(&pdev->dev, r, info);
+	lpwm = pwm_lpss_probe(&pdev->dev, r, id->driver_data);
 	if (IS_ERR(lpwm))
 		return PTR_ERR(lpwm);
 
@@ -53,9 +51,9 @@ static int pwm_lpss_remove_platform(struct platform_device *pdev)
 }
 
 static const struct acpi_device_id pwm_lpss_acpi_match[] = {
-	{ "80860F09", (unsigned long)&pwm_lpss_byt_info },
-	{ "80862288", (unsigned long)&pwm_lpss_bsw_info },
-	{ "80865AC8", (unsigned long)&pwm_lpss_bxt_info },
+	{ "80860F09", PWM_LPSS_BYT },
+	{ "80862288", PWM_LPSS_BSW },
+	{ "80865AC8", PWM_LPSS_BXT },
 	{ },
 };
 MODULE_DEVICE_TABLE(acpi, pwm_lpss_acpi_match);
