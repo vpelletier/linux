@@ -37,29 +37,32 @@ struct pwm_lpss_chip {
 	const struct pwm_lpss_boardinfo *info;
 };
 
-/* BayTrail */
-const struct pwm_lpss_boardinfo pwm_lpss_byt_info = {
-	.clk_rate = 25000000,
-	.npwm = 1,
-	.base_unit_bits = 16,
+struct pwm_lpss_boardinfo {
+	unsigned long clk_rate;
+	unsigned int npwm;
+	unsigned long base_unit_bits;
 };
-EXPORT_SYMBOL_GPL(pwm_lpss_byt_info);
 
-/* Braswell */
-const struct pwm_lpss_boardinfo pwm_lpss_bsw_info = {
-	.clk_rate = 19200000,
-	.npwm = 1,
-	.base_unit_bits = 16,
+static const struct pwm_lpss_boardinfo pwm_lpss_types[] = {
+	/* Baytrail */
+	[PWM_LPSS_BYT] = {
+		.clk_rate = 25000000,
+		.npwm = 1,
+		.base_unit_bits = 16,
+	},
+	/* Braswell */
+	[PWM_LPSS_BSW] = {
+		.clk_rate = 19200000,
+		.npwm = 1,
+		.base_unit_bits = 16,
+	},
+	/* Broxton */
+	[PWM_LPSS_BXT] = {
+		.clk_rate = 19200000,
+		.npwm = 4,
+		.base_unit_bits = 22,
+	},
 };
-EXPORT_SYMBOL_GPL(pwm_lpss_bsw_info);
-
-/* Broxton */
-const struct pwm_lpss_boardinfo pwm_lpss_bxt_info = {
-	.clk_rate = 19200000,
-	.npwm = 4,
-	.base_unit_bits = 22,
-};
-EXPORT_SYMBOL_GPL(pwm_lpss_bxt_info);
 
 static inline struct pwm_lpss_chip *to_lpwm(struct pwm_chip *chip)
 {
@@ -160,7 +163,7 @@ static const struct pwm_ops pwm_lpss_ops = {
 };
 
 struct pwm_lpss_chip *pwm_lpss_probe(struct device *dev, struct resource *r,
-				     const struct pwm_lpss_boardinfo *info)
+				     enum pwm_lpss_type type)
 {
 	struct pwm_lpss_chip *lpwm;
 	unsigned long c;
@@ -174,7 +177,7 @@ struct pwm_lpss_chip *pwm_lpss_probe(struct device *dev, struct resource *r,
 	if (IS_ERR(lpwm->regs))
 		return ERR_CAST(lpwm->regs);
 
-	lpwm->info = info;
+	lpwm->info = &pwm_lpss_types[type];
 
 	c = lpwm->info->clk_rate;
 	if (!c)
@@ -183,7 +186,7 @@ struct pwm_lpss_chip *pwm_lpss_probe(struct device *dev, struct resource *r,
 	lpwm->chip.dev = dev;
 	lpwm->chip.ops = &pwm_lpss_ops;
 	lpwm->chip.base = -1;
-	lpwm->chip.npwm = info->npwm;
+	lpwm->chip.npwm = lpwm->info->npwm;
 
 	ret = pwmchip_add(&lpwm->chip);
 	if (ret) {

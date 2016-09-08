@@ -18,18 +18,14 @@
 
 struct pwm_lpss_chip;
 
-struct pwm_lpss_boardinfo {
-	unsigned long clk_rate;
-	unsigned int npwm;
-	unsigned long base_unit_bits;
+enum pwm_lpss_type {
+	PWM_LPSS_BYT,
+	PWM_LPSS_BSW,
+	PWM_LPSS_BXT,
 };
 
-extern const struct pwm_lpss_boardinfo pwm_lpss_byt_info;
-extern const struct pwm_lpss_boardinfo pwm_lpss_bsw_info;
-extern const struct pwm_lpss_boardinfo pwm_lpss_bxt_info;
-
 struct pwm_lpss_chip *pwm_lpss_probe(struct device *dev, struct resource *r,
-				     const struct pwm_lpss_boardinfo *info);
+				     enum pwm_lpss_type type);
 int pwm_lpss_remove(struct pwm_lpss_chip *lpwm);
 
 #endif	/* __PWM_LPSS_H */
