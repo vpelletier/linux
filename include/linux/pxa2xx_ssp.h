@@ -173,6 +173,16 @@
 #define SSACD_ACDS(x)		((x) << 0)	/* Audio clock divider select */
 #define SSACD_SCDX8		(1 << 7)	/* SYSCLK division ratio select */
 
+/* Merrifield SSP */
+#define RX_THRESH_MRFLD_DFLT	8
+#define TX_THRESH_MRFLD_DFLT	8
+
+#define SSFIFOL			0x68			/* FIFO level */
+#define SSFIFOTT		0x6c			/* FIFO trigger threshold */
+
+#define SSFIFOTT_TxThresh(x)	(((x) - 1) << 0)	/* TX FIFO trigger threshold / level */
+#define SSFIFOTT_RxThresh(x)	(((x) - 1) << 16)	/* RX FIFO trigger threshold / level */
+
 /* LPSS SSP */
 #define SSITF			0x44		/* TX FIFO trigger level */
 #define SSITF_TxLoThresh(x)	(((x) - 1) << 8)
@@ -190,6 +200,7 @@ enum pxa_ssp_type {
 	PXA168_SSP,
 	PXA910_SSP,
 	CE4100_SSP,
+	MRFLD_SSP,
 	QUARK_X1000_SSP,
 	LPSS_LPT_SSP, /* Keep LPSS types sorted with lpss_platforms[] */
 	LPSS_BYT_SSP,
