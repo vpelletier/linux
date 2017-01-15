@@ -12,7 +12,9 @@
 #include <asm/vsyscall.h>
 #include <asm/x86_init.h>
 #include <asm/time.h>
+#include <asm/hw_irq.h>
 #include <asm/intel-mid.h>
+#include <asm/io_apic.h>
 #include <asm/setup.h>
 
 #ifdef CONFIG_X86_32
@@ -155,6 +157,20 @@ void read_persistent_clock(struct timespec *ts)
 	x86_platform.get_wallclock(ts);
 }
 
+#ifdef CONFIG_X86_IO_APIC
+static __init int allocate_rtc_cmos_irq(void)
+{
+	struct irq_alloc_info info;
+
+	if (!intel_mid_identify_cpu())
+	       return 0;
+
+	ioapic_set_alloc_attr(&info, NUMA_NO_NODE, 1, 0);
+	return mp_map_gsi_to_irq(RTC_IRQ, IOAPIC_MAP_ALLOC, &info);
+}
+#else
+static inline int allocate_rtc_cmos_irq(void) { return 0; }
+#endif
 
 static struct resource rtc_resources[] = {
 	[0] = {
@@ -178,6 +194,7 @@ static struct platform_device rtc_device = {
 
 static __init int add_rtc_cmos(void)
 {
+	int ret;
 #ifdef CONFIG_PNP
 	static const char * const ids[] __initconst =
 	    { "PNP0b00", "PNP0b01", "PNP0b02", };
@@ -196,6 +213,10 @@ static __init int add_rtc_cmos(void)
 #endif
 	if (!x86_platform.legacy.rtc)
 		return -ENODEV;
+
+	ret = allocate_rtc_cmos_irq();
+	if (ret < 0)
+		return ret;
 
 	platform_device_register(&rtc_device);
 	dev_info(&rtc_device.dev,
