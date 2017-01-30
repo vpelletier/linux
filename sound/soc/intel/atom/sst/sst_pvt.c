@@ -39,10 +39,9 @@
 #include "sst.h"
 #include "../../common/sst-dsp.h"
 
-int sst_shim_write(void __iomem *addr, int offset, int value)
+void sst_shim_write(void __iomem *addr, int offset, int value)
 {
 	writel(value, addr + offset);
-	return 0;
 }
 
 u32 sst_shim_read(void __iomem *addr, int offset)
@@ -50,10 +49,9 @@ u32 sst_shim_read(void __iomem *addr, int offset)
 	return readl(addr + offset);
 }
 
-int sst_shim_write64(void __iomem *addr, int offset, u64 value)
+void sst_shim_write64(void __iomem *addr, int offset, u64 value)
 {
 	lo_hi_writeq(value, addr + offset);
-	return 0;
 }
 
 u64 sst_shim_read64(void __iomem *addr, int offset)
