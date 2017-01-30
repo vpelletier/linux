@@ -534,9 +534,9 @@ u32 relocate_imr_addr_mrfld(u32 base_addr);
 void sst_add_to_dispatch_list_and_post(struct intel_sst_drv *sst,
 					struct ipc_post *msg);
 int sst_pm_runtime_put(struct intel_sst_drv *sst_drv);
-int sst_shim_write(void __iomem *addr, int offset, int value);
+void sst_shim_write(void __iomem *addr, int offset, int value);
 u32 sst_shim_read(void __iomem *addr, int offset);
-int sst_shim_write64(void __iomem *addr, int offset, u64 value);
+void sst_shim_write64(void __iomem *addr, int offset, u64 value);
 u64 sst_shim_read64(void __iomem *addr, int offset);
 void sst_set_fw_state_locked(
 		struct intel_sst_drv *sst_drv_ctx, int sst_state);
